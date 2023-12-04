@@ -1,0 +1,125 @@
+<style>
+  a.collection-tabs-item {
+    display: inline-block;
+    border-bottom: 5px solid transparent;
+    color: lightgrey;
+    text-transform: uppercase;
+    padding: 10px 30px;
+    text-decoration: none;
+  }
+
+  a.collection-tabs-item:hover {
+    color: navy;
+    border-color: navy;
+  }
+
+  .collection-tabs-nav a.hamburger {
+    display: none;
+    text-decoration: none;
+    color: lightgrey;
+  }
+  .collection-tabs-nav a.hamburger:hover {
+    color: navy;
+  }    
+
+  @media screen and (max-width: 600px) {
+    .collection-tabs-nav a.collection-tabs-item { display: none; }
+    .collection-tabs-nav a.hamburger { display: block; }
+    .collection-tabs-nav.open { position: relative; }
+
+    .collection-tabs-nav.open .hamburger {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .collection-tabs-nav.open a.collection-tabs-item {
+      display: block;
+    }
+  }
+</style>
+
+<div class="page-width">
+  <div class="collection-tabs-nav">
+    {% for block in section.blocks %}
+      <a href="{{ block.settings.collection.url }}" class="collection-tabs-item">
+        {% if block.settings.title != '' %}
+          {{ block.settings.title }}
+        {% else %}
+          {{ block.settings.collection.title }}
+        {% endif %}
+      </a>
+    {% endfor %}
+    <a href="#" class="hamburger">&#9776;</a>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', (event) => {
+
+    $('body').on('click', '.collection-tabs-nav a.hamburger', function(event) {
+      event.preventDefault();
+      $('.collection-tabs-nav').toggleClass('open');
+    });
+
+    $('body').on('click', '.collection-tabs-item', function(event) {
+      event.preventDefault();
+      const sectionUrl = $(this).attr('href');
+      const sectionName = $(this).text();
+
+      changeUrlBar(sectionName, sectionUrl);
+      changeMainContent(sectionUrl);
+
+    });
+
+    changeUrlBar = (sectionName, sectionUrl) => {
+      history.pushState({}, sectionName, sectionUrl);
+      document.title = `${sectionName} - {{ shop.name }}`;
+    };
+
+    changeMainContent = (sectionUrl) => {
+      let url = window.location.origin + sectionUrl;
+
+      fetch(url).then((response) => response.text())
+        .then((responseText) => {
+        const newHtml = new DOMParser()
+        .parseFromString(responseText, 'text/html')
+        .getElementById('MainContent').innerHTML;
+
+        document.getElementById('MainContent').innerHTML = newHtml;
+      });
+    }
+
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Collection Tabs",
+    "settings": [],
+    "presets": [
+      {
+        "name": "Collection Tabs",
+        "settings": {}
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection_tab",
+        "name": "Collection Tab",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Custom Tab Text",
+            "info": "optional, defaults to Collection Name"
+          }, {
+            "type": "collection",
+            "id": "collection",
+            "label": "Collection"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
