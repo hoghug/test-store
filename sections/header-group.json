@@ -8,7 +8,7 @@
         "announcement-bar-0": {
           "type": "announcement",
           "settings": {
-            "text": "This would be for all dog food products",
+            "text": "",
             "link": ""
           }
         }
